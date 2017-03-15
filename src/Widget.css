@@ -1,0 +1,22 @@
+.Widget {
+    box-shadow: #CCCCCC 0 0 20px 0;
+    margin: 50px;
+    display: inline-table;
+}
+
+.Clock {
+}
+
+.ToolTip {
+    right: -75px;
+    border-bottom: solid #CCC 1px;
+}
+
+.ToolTip button {
+    text-align: right;
+
+}
+
+.btn-link-danger:hover {
+    color: red;
+}

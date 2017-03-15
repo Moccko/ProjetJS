@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
+import Clock from "./Clock";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
@@ -14,6 +15,7 @@ const body = (
                 </h1>
             </div>
         </div>
+        <Clock/>
         <Footer/>
     </div>
 );
