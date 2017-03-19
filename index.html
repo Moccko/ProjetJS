@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="favicon.png">
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-awusxf8AUojygHf2+joICySzB780jVvQaVCAt1clU3QsyAitLGul28Qxb2r1e5g+" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+
+    <title>React App</title>
+</head>
+<body>
+<script>
+    function updateClock() {
+        let currentTime = new Date();
+        let currentHours = ('0' + currentTime.getHours()).slice(-2);
+        let currentMinutes = ('0' + currentTime.getMinutes()).slice(-2);
+        let currentSeconds = ('0' + currentTime.getSeconds()).slice(-2);
+
+        let hm = currentHours + ':' + currentMinutes;
+        let s = ':' + currentSeconds;
+
+        let days = [
+            "",
+            "Lundi",
+            "Mardi",
+            "Mercredi",
+            "Jeudi",
+            "Vendredi",
+            "Samedi",
+            "Dimanche",
+        ];
+
+        let months = [
+            "Janvier",
+            "Février",
+            "Mars",
+            "Avril",
+            "Mai",
+            "Juin",
+            "Juillet",
+            "Août",
+            "Septembre",
+            "Octobre",
+            "Novembre",
+            "Décembre",
+        ];
+
+        let currentDayString = days[currentTime.getDay()] + " " + currentTime.getDate() + " " + months[currentTime.getMonth()] + " " + currentTime.getFullYear();
+
+
+        $("#hour").text(hm).append($('<small></small>').text(s));
+//        $('#seconds').text(s);
+        $('#date').text(currentDayString);
+
+    }
+
+
+    function getWeather(position) {
+        const apiKey = 'b23b6e94de1f403ca2312a227ed208c5';
+        const lat = position.coords.latitude;
+        const long = position.coords.longitude;
+        let weather = 'http://api.openweathermap.org/data/2.5/weather?';
+        let forecast = 'http://api.openweathermap.org/data/2.5/forecast?';
+        let parameters = 'lat=' + lat;
+        parameters += '&lon=' + long;
+        parameters += '&lang=' + navigator.language;
+        parameters += '&units=metric';
+        parameters += '&appid=' + apiKey;
+        $.getJSON(weather + parameters, function (data) {
+            $('#town').text(data.name);
+            $('#temp').text(data.main.temp + "°C");
+            const icon = 'http://openweathermap.org/img/w/' + data.weather["0"].icon + '.png';
+            $('#icon').attr('src', icon);
+        });
+        $.getJSON(forecast + parameters, function (data) {
+            console.debug(data);
+            $('#tempmin').text(data.list["0"].main.temp_min + "°C");
+            $('#tempmax').text(data.list["0"].main.temp_max + "°C");
+        })
+    }
+
+    $(document).ready(function () {
+        setInterval('updateClock()', 1000);
+        navigator.geolocation.getCurrentPosition(getWeather);
+    });
+</script>
+<nav class="navbar navbar-default" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#" style="padding: 10px"><img src="ireact.png" height="100%"></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <form class="navbar-form navbar-right" role="search">
+            <div class="form-group input-group">
+                <input id="search" type="text" class="form-control" placeholder="Search..">
+                <span class="input-group-btn">
+            <button class="btn btn-default" type="button">
+              <span class="glyphicon glyphicon-search"></span>
+            </button>
+          </span>
+            </div>
+        </form>
+    </div>
+</nav>
+<div class="container">
+    <div class="col-md-4">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Clock</h3>
+                <span class="glyphicon glyphicon-trash close"></span>
+            </div>
+            <div class="panel-body">
+                <h1 id="hour"></h1>
+                <h3 id="date"></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Weather</h3>
+            </div>
+            <div class="panel-body">
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <img id="icon"/>
+                </div>
+                <h2 id="town" class="col-xs-9 col-sm-9 col-md-9 col-lg-9"></h2>
+                <h4 class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Temp&eacute;rature <span id="temp"></span></h4>
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <p class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Min : <span id="tempmin"></span></p>
+                    <p class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Max : <span id="tempmax"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
