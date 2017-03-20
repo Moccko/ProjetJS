@@ -61,19 +61,20 @@
 
     }
 
+    function googleSearch() {
+        var google = 'https://www.google.fr/#newwindow=1&q=';
+        google += encodeURI($('#search').val());
+        window.location.href = google;
+    }
+
     function getWeather(position) {
         const apiKey = 'b23b6e94de1f403ca2312a227ed208c5';
-        let parameters = '?';
-//        if (position.coords == null) {
-//
-//        } else {
         const lat = position.coords.latitude;
         const long = position.coords.longitude;
         let weather = 'http://api.openweathermap.org/data/2.5/weather?';
         let forecast = 'http://api.openweathermap.org/data/2.5/forecast?';
-        parameters = 'lat=' + lat;
+        let parameters = 'lat=' + lat;
         parameters += '&lon=' + long;
-//        }
         parameters += '&lang=' + navigator.language;
         parameters += '&units=metric';
         parameters += '&appid=' + apiKey;
@@ -91,16 +92,42 @@
     }
 
     function updateWeather() {
-        getWeather($('#ville').text());
+        var city = $('#ville').val();
+        if (city === '') {
+            navigator.geolocation.getCurrentPosition(getWeather);
+        } else {
+            city = city.toLowerCase();
+            city.replace(/\s+/g, '');
+            console.log(city);
+            getCityWeather(city);
+        }
     }
 
-    function choisir()
-    {
-        var choix = window.prompt("Choisir", "");
+    function getCityWeather(town) {
+        const apiKey = 'b23b6e94de1f403ca2312a227ed208c5';
+        let weather = 'http://api.openweathermap.org/data/2.5/weather?';
+        let forecast = 'http://api.openweathermap.org/data/2.5/forecast?';
+        let parameters = 'q=' + town;
+        parameters += '&lang=' + navigator.language;
+        parameters += '&units=metric';
+        parameters += '&appid=' + apiKey;
+        $.getJSON(weather + parameters, function (data) {
+            $('#town').text(data.name);
+            $('#temp').text(data.main.temp + "°C");
+            const icon = 'http://openweathermap.org/img/w/' + data.weather["0"].icon + '.png';
+            $('#icon').attr('src', icon);
+        });
+        $.getJSON(forecast + parameters, function (data) {
+            console.debug(data);
+            $('#tempmin').text(data.list["0"].main.temp_min + "°C");
+            $('#tempmax').text(data.list["0"].main.temp_max + "°C");
+        });
+    }
+
+    function youtubeSearch() {
         var fr = document.getElementById("ytplayer");
-        fr.src = "http://www.youtube.com/embed?listType=search&list=" + choix;
+        fr.src = "http://www.youtube.com/embed?listType=search&list=" + $('#yt').val();
     }
-
 
     $(document).ready(function () {
         setInterval('updateClock()', 1000);
@@ -125,7 +152,7 @@
             <div class="form-group input-group">
                 <input id="search" type="text" class="form-control" placeholder="Search...">
                 <span class="input-group-btn">
-            <button class="btn btn-default" type="button">
+            <button class="btn btn-default" onclick="googleSearch()" type="button">
               <span class="glyphicon glyphicon-search"></span>
             </button>
           </span>
@@ -133,9 +160,7 @@
         </form>
     </div>
 </nav>
-
 <div class="container">
-
     <div class="col-md-4">
         <div class="panel panel-info">
             <div class="panel-heading">
@@ -148,9 +173,8 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-4 col-lg-4">
-        <div class="panel panel-primary">
+        <div class="panel panel-warning">
             <div class="panel-heading">
                 <h3 class="panel-title">Weather</h3>
             </div>
@@ -158,10 +182,10 @@
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                     <img id="icon"/>
                 </div>
-                <div class="input-group col-md-9">
+                <div class="input-group col-md-9 has-warning">
                     <input type="text" class="form-control" placeholder="Ville" id="ville">
                     <div class="input-group-btn">
-                        <button class="btn btn-default" type="submit" onclick="updateWeather()">
+                        <button class="btn btn-warning" type="submit" onclick="updateWeather()">
                             <i class="glyphicon glyphicon-search"></i>
                         </button>
                     </div>
@@ -175,19 +199,39 @@
             </div>
         </div>
     </div>
-
     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-    <div class="panel panel-danger">
-
+        <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Youtube</h3>
+                <h3 class="panel-title">Tweets de Michel Billaud</h3>
             </div>
             <div class="panel-body">
-                <input type="button" value="Choisir" onclick="choisir();" />
-                <iframe id="ytplayer" type="text/html" width="600" height="400"
-                        src="http://www.youtube.com/embed?listType=search&list=INdes galantes"
-                        frameborder="0" />
+                <a class="twitter-timeline" data-height="250" href="https://twitter.com/MichelBillaud">Tweets by
+                    MichelBillaud</a>
+                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <div class="panel panel-danger">
 
+            <div class="panel-heading">
+                <h3 class="panel-title">YouTube</h3>
+            </div>
+            <div class="panel-body">
+                <div class="input-group has-error">
+                    <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                    <div class="input-group-btn">
+                        <button class="btn btn-danger" type="submit" onclick="youtubeSearch()">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <br>
+                <div class="embed-responsive embed-responsive-4by3">
+                    <iframe class="embed-responsive-item" id="ytplayer" type="text/html"
+                            src="http://www.youtube.com/embed?listType=search&list=INdes galantes"
+                            frameborder="0"></iframe>
+                </div>
             </div>
         </div>
     </div>
