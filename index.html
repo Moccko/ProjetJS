@@ -17,7 +17,7 @@
     <title>React App</title>
 </head>
 <body>
-<script>
+<script type="text/javascript">
     function updateClock() {
         let currentTime = new Date();
         let currentHours = ('0' + currentTime.getHours()).slice(-2);
@@ -127,21 +127,56 @@
         fr.src = "http://www.youtube.com/embed?listType=search&list=" + $('#yt').val();
     }
 
-    function createMap(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        var mapProp = {
-            zoom: 16,
-            center: new google.maps.LatLng(lat, lng),
-            myTypeId: google.maps.MapTypeId.ROADMAP
+    var geocoder;
+    var map;
+    var markers = new Array();
+    var i = 0;
+
+    function initialize() {
+        geocoder = new google.maps.Geocoder();
+        var myOptions = {
+            zoom: 15,
+            center: new google.maps.LatLng(44.7899772, -0.6148396),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
         };
-        var map = new google.maps.Map(document.getElementById("map"), mapProp);
+        map = new google.maps.Map(document.getElementById('map'), myOptions);
+        document.getElementById("mapSearch").value = "Rue Naudet, Gradignan";
+        codeAddress("Rue Naudet, Gradignan");
     }
+
+    function Deplace() {
+        var address = document.getElementById("mapSearch").value;
+        codeAddress(address);
+    }
+
+    function codeAddress(address) {
+        /* Appel au service de geocodage avec l'adresse en paramètre */
+        geocoder.geocode({'address': address}, function (results, status) {
+            /* Si l'adresse a pu être géolocalisée */
+            if (status == google.maps.GeocoderStatus.OK) {
+                map.setCenter(results[0].geometry.location);
+                /* Affichage du marker */
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location
+                });
+                /* Permet de supprimer le marker précédemment affiché */
+                markers.push(marker);
+                if (markers.length > 1)
+                    markers[(i - 1)].setMap(null);
+                i++;
+            } else {
+                alert("Le geocodage n\'a pu etre effectue pour la raison suivante: " + status);
+            }
+        });
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
 
     $(document).ready(function () {
         setInterval('updateClock()', 1000);
         navigator.geolocation.getCurrentPosition(getWeather);
-        navigator.geolocation.getCurrentPosition(createMap);
+        navigator.geolocation.getCurrentPosition(initialize);
     });
 </script>
 
@@ -247,6 +282,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
         <div class="panel panel-success">
             <div class="panel-heading">
@@ -254,9 +290,9 @@
             </div>
             <div class="panel-body">
                 <div class="input-group has-success">
-                    <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                    <input type="text" class="form-control" placeholder="Lieu" id="mapSearch">
                     <div class="input-group-btn">
-                        <button class="btn btn-success" type="submit" onclick="">
+                        <button class="btn btn-success" type="submit" onclick="Deplace()">
                             <i class="glyphicon glyphicon-search"></i>
                         </button>
                     </div>
