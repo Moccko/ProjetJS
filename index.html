@@ -94,6 +94,14 @@
         getWeather($('#ville').text());
     }
 
+    function choisir()
+    {
+        var choix = window.prompt("Choisir", "");
+        var fr = document.getElementById("ytplayer");
+        fr.src = "http://www.youtube.com/embed?listType=search&list=" + choix;
+    }
+
+
     $(document).ready(function () {
         setInterval('updateClock()', 1000);
         navigator.geolocation.getCurrentPosition(getWeather);
@@ -125,7 +133,9 @@
         </form>
     </div>
 </nav>
+
 <div class="container">
+
     <div class="col-md-4">
         <div class="panel panel-info">
             <div class="panel-heading">
@@ -138,6 +148,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-md-4 col-lg-4">
         <div class="panel panel-primary">
             <div class="panel-heading">
@@ -164,6 +175,24 @@
             </div>
         </div>
     </div>
+
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+    <div class="panel panel-danger">
+
+            <div class="panel-heading">
+                <h3 class="panel-title">Youtube</h3>
+            </div>
+            <div class="panel-body">
+                <input type="button" value="Choisir" onclick="choisir();" />
+                <iframe id="ytplayer" type="text/html" width="600" height="400"
+                        src="http://www.youtube.com/embed?listType=search&list=INdes galantes"
+                        frameborder="0" />
+
+            </div>
+        </div>
+    </div>
+
+
 </div>
 </body>
 </html>
