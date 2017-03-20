@@ -138,6 +138,23 @@
         var map = new google.maps.Map(document.getElementById("map"), mapProp);
     }
 
+    function loadImage() {
+        var tags = $('#imageSearch').val();
+        tags = tags.replace(/\s+/g, ',');
+        tags = encodeURI(tags);
+        var url = 'https://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?';
+        url += '&format=json';
+        url += '&lang=fr-fr';
+        url += '&tags=' + tags;
+        var imageUrl;
+        console.log(url);
+        $.getJSON(url, function (data) {
+            console.debug(data);
+            imageUrl = data.items['0'].media.m;
+            $('#image').attr('src', imageUrl);
+        });
+    }
+
     $(document).ready(function () {
         setInterval('updateClock()', 1000);
         navigator.geolocation.getCurrentPosition(getWeather);
@@ -172,8 +189,8 @@
     </div>
 </nav>
 
-<div class="container">
-    <div class="col-md-4">
+<div class="container-fluid">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">Clock</h3>
@@ -185,13 +202,13 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 col-lg-4">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
         <div class="panel panel-warning">
             <div class="panel-heading">
                 <h3 class="panel-title">Weather</h3>
             </div>
             <div class="panel-body">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
                     <img id="icon" src=""/>
                 </div>
                 <div class="input-group col-md-9 has-warning">
@@ -202,7 +219,7 @@
                         </button>
                     </div>
                 </div>
-                <h2 id="town" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></h2>
+                <h2 id="town" class="col-xs-6 col-sm-12 col-md-12 col-lg-12"></h2>
                 <h4 class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Temp&eacute;rature <span id="temp"></span></h4>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <p class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Min : <span id="tempmin"></span></p>
@@ -211,7 +228,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Tweets de Michel Billaud</h3>
@@ -223,9 +240,8 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
         <div class="panel panel-danger">
-
             <div class="panel-heading">
                 <h3 class="panel-title">YouTube</h3>
             </div>
@@ -239,7 +255,7 @@
                     </div>
                 </div>
                 <br>
-                <div class="embed-responsive embed-responsive-16by9">
+                <div class="embed-responsive embed-responsive-4by3">
                     <iframe class="embed-responsive-item" id="ytplayer"
                             src="http://www.youtube.com/embed?listType=search&list=INdes galantes"
                             frameborder="0"></iframe>
@@ -247,14 +263,14 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
         <div class="panel panel-success">
             <div class="panel-heading">
                 <h3 class="panel-title">Google Maps</h3>
             </div>
             <div class="panel-body">
                 <div class="input-group has-success">
-                    <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                    <input type="text" class="form-control" placeholder="Lieu" id="mapSearch">
                     <div class="input-group-btn">
                         <button class="btn btn-success" type="submit" onclick="">
                             <i class="glyphicon glyphicon-search"></i>
@@ -262,8 +278,26 @@
                     </div>
                 </div>
                 <br>
-                <div id="map" class="embed-responsive embed-responsive-16by9">
-
+                <div id="map" class="embed-responsive embed-responsive-4by3">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">Flickr</div>
+            <div class="panel-body">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Mot clé" id="imageSearch">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" type="submit" onclick="loadImage()">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <br>
+                <div class="embed-responsive embed-responsive-4by3">
+                    <img id="image" src="">
                 </div>
             </div>
         </div>
