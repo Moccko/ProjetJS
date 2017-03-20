@@ -12,6 +12,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDzxhXaQR4V9itywOW6X048_9qZEw03uOg&sensor=false"></script>
 
     <title>React App</title>
 </head>
@@ -34,9 +35,8 @@
             "Jeudi",
             "Vendredi",
             "Samedi",
-            "Dimanche",
+            "Dimanche"
         ];
-
         let months = [
             "Janvier",
             "Février",
@@ -49,14 +49,12 @@
             "Septembre",
             "Octobre",
             "Novembre",
-            "Décembre",
+            "Décembre"
         ];
 
         let currentDayString = days[currentTime.getDay()] + " " + currentTime.getDate() + " " + months[currentTime.getMonth()] + " " + currentTime.getFullYear();
 
-
         $("#hour").text(hm).append($('<small></small>').text(s));
-//        $('#seconds').text(s);
         $('#date').text(currentDayString);
 
     }
@@ -129,11 +127,24 @@
         fr.src = "http://www.youtube.com/embed?listType=search&list=" + $('#yt').val();
     }
 
+    function createMap(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        var mapProp = {
+            zoom: 16,
+            center: new google.maps.LatLng(lat, lng),
+            myTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("map"), mapProp);
+    }
+
     $(document).ready(function () {
         setInterval('updateClock()', 1000);
         navigator.geolocation.getCurrentPosition(getWeather);
+        navigator.geolocation.getCurrentPosition(createMap)
     });
 </script>
+
 <nav class="navbar navbar-default" role="navigation">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -160,6 +171,7 @@
         </form>
     </div>
 </nav>
+
 <div class="container">
     <div class="col-md-4">
         <div class="panel panel-info">
@@ -180,7 +192,7 @@
             </div>
             <div class="panel-body">
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <img id="icon"/>
+                    <img id="icon" src=""/>
                 </div>
                 <div class="input-group col-md-9 has-warning">
                     <input type="text" class="form-control" placeholder="Ville" id="ville">
@@ -227,15 +239,35 @@
                     </div>
                 </div>
                 <br>
-                <div class="embed-responsive embed-responsive-4by3">
-                    <iframe class="embed-responsive-item" id="ytplayer" type="text/html"
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" id="ytplayer"
                             src="http://www.youtube.com/embed?listType=search&list=INdes galantes"
                             frameborder="0"></iframe>
                 </div>
             </div>
         </div>
     </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">Google Maps</h3>
+            </div>
+            <div class="panel-body">
+                <div class="input-group has-success">
+                    <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                    <div class="input-group-btn">
+                        <button class="btn btn-success" type="submit" onclick="">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <br>
+                <div id="map" class="embed-responsive embed-responsive-16by9">
 
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 </body>
