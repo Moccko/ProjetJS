@@ -6,15 +6,37 @@
     <link rel="shortcut icon" href="favicon.png">
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-awusxf8AUojygHf2+joICySzB780jVvQaVCAt1clU3QsyAitLGul28Qxb2r1e5g+" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"
             integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
             crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDzxhXaQR4V9itywOW6X048_9qZEw03uOg&sensor=false"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDzxhXaQR4V9itywOW6X048_9qZEw03uOg"></script>
 
     <title>React App</title>
+    <style>
+        .table-fixed thead {
+            width: 97%;
+        }
+
+        .table-fixed tbody {
+            height: 206px;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+            display: block;
+        }
+
+        .table-fixed tbody td, .table-fixed thead > tr > th {
+            float: left;
+            border-bottom-width: 0;
+        }
+    </style>
 </head>
 <body>
 <script>
@@ -59,9 +81,10 @@
     }
 
     function googleSearch() {
-        var google = 'https://www.google.fr/#newwindow=1&q=';
+        var google = "https://www.google.fr/#newwindow=1&q=";
         google += encodeURI($('#search').val());
-        window.location.href = google;
+        window.location = google;
+        console.log('Redirect to ' + google);
     }
 
     function getWeather(position) {
@@ -82,7 +105,7 @@
             $('#icon').attr('src', icon);
         });
         $.getJSON(forecast + parameters, function (data) {
-            console.debug(data);
+//            console.debug(data);
             $('#tempmin').text(data.list["0"].main.temp_min + "°C");
             $('#tempmax').text(data.list["0"].main.temp_max + "°C");
         })
@@ -128,7 +151,7 @@
 
     var geocoder;
     var map;
-    var markers = new Array();
+    var markers = [];
     var i = 0;
 
     function initialize() {
@@ -152,7 +175,7 @@
         /* Appel au service de geocodage avec l'adresse en paramètre */
         geocoder.geocode({'address': address}, function (results, status) {
             /* Si l'adresse a pu être géolocalisée */
-            if (status == google.maps.GeocoderStatus.OK) {
+            if (status === google.maps.GeocoderStatus.OK) {
                 map.setCenter(results[0].geometry.location);
                 /* Affichage du marker */
                 var marker = new google.maps.Marker({
@@ -180,12 +203,80 @@
         url += '&format=json';
         url += '&lang=fr-fr';
         url += '&tags=' + tags;
-        var imageUrl;
-        console.log(url);
         $.getJSON(url, function (data) {
-            console.debug(data);
-            imageUrl = data.items['0'].media.m;
-            $('#image').attr('src', imageUrl);
+            $('#image').attr({
+                'src': data.items['0'].media.m,
+                'alt': data.items["0"].title
+            });
+        });
+    }
+
+    function wikiCommons(url) {
+        return url.replace('de', 'commons');
+    }
+
+    function loadResults(id) {
+        $.ajax({
+            headers: {'X-Auth-Token': '33021dcd1c0a4f1aaf86dbad381ebd8c'},
+            url: 'http://api.football-data.org/v1/teams/' + id + '/fixtures?timeFrame=p99',
+            dataType: 'json',
+            type: 'GET'
+        }).done(function (response) {
+            var homeHref, awayHref;
+            var table = document.getElementById('bayern');
+            $.each(response.fixtures, function (i, match) {
+                var date = match.date.replace(/T/, ' ');
+                date = date.replace(/Z/, '');
+                var results = [
+                    date,
+                    match.homeTeamName,
+                    match.result.goalsHomeTeam,
+                    match.result.goalsAwayTeam,
+                    match.awayTeamName
+                ];
+                var row = table.insertRow();
+                var cell0 = row.insertCell(0);
+                cell0.className = 'col-xs-4 col-sm-4 col-md-4 col-lg-4';
+                cell0.innerText = results[0];
+                var cell1 = row.insertCell(1);
+                cell1.className = 'col-xs-3 col-sm-3 col-md-3 col-lg-3';
+                var cell2 = row.insertCell(2);
+                cell2.className = 'col-xs-1 col-sm-1 col-md-1 col-lg-1';
+                cell2.innerText = results[2];
+                var cell3 = row.insertCell(3);
+                cell3.className = 'col-xs-1 col-sm-1 col-md-1 col-lg-1';
+                cell3.innerText = results[3];
+                var cell4 = row.insertCell(4);
+                cell4.className = 'col-xs-3 col-sm-3 col-md-3 col-lg-3';
+                homeHref = match._links.homeTeam.href;
+                awayHref = match._links.awayTeam.href;
+                $.ajax({
+                    headers: {'X-Auth-Token': '33021dcd1c0a4f1aaf86dbad381ebd8c'},
+                    url: homeHref,
+                    dataType: 'json',
+                    type: 'GET'
+                }).done(function (response) {
+//                    var homeImage = document.createElement('img');
+//                    homeImage.src = response.crestUrl;
+//                    homeImage.alt = results[1];
+//                    homeImage.width = '100%';
+//                    cell1.appendChild(homeImage);
+                    cell1.innerHTML = '<img src="' + response.crestUrl + '" alt="' + results[1] + '" height="50px"/>';
+                });
+                $.ajax({
+                    headers: {'X-Auth-Token': '33021dcd1c0a4f1aaf86dbad381ebd8c'},
+                    url: awayHref,
+                    dataType: 'json',
+                    type: 'GET'
+                }).done(function (response) {
+//                    var awayImage = document.createElement('img');
+//                    awayImage.src = response.crestUrl;
+//                    awayImage.alt = results[4];
+//                    awayImage.width = '100%';
+//                    cell1.appendChild(awayImage);
+                    cell4.innerHTML = '<img src="' + response.crestUrl + '" alt="' + results[4] + '" height="50px"/>';
+                });
+            });
         });
     }
 
@@ -193,42 +284,64 @@
         setInterval('updateClock()', 1000);
         navigator.geolocation.getCurrentPosition(getWeather);
         navigator.geolocation.getCurrentPosition(initialize);
+        loadResults(5);
     });
 </script>
 
-<nav class="navbar navbar-default" role="navigation">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="#" style="padding: 10px"><img src="ireact.png" height="100%"></a>
-    </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-        <form class="navbar-form navbar-right" role="search">
-            <div class="form-group input-group">
-                <input id="search" type="text" class="form-control" placeholder="Search...">
-                <span class="input-group-btn">
-            <button class="btn btn-default" onclick="googleSearch()" type="button">
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#" style="padding: 10px"><img src="ireact.png" height="100%"></a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-center">
+                <li><a href="#" class="material-icons" onclick="$('#clockContainer').toggle('fast');">access_time</a>
+                </li>
+                <li><a href="#" class="material-icons" onclick="$('#weatherContainer').toggle('fast');">wb_sunny</a>
+                </li>
+                <li><a href="#" class="fa fa-twitter" style="font-size: x-large"
+                       onclick="$('#twitterContainer').toggle('fast');"></a></li>
+                <li><a href="#" class="fa fa-youtube" style="font-size: x-large"
+                       onclick="$('#youtubeContainer').toggle('fast');"></a></li>
+                <li><a href="#" class="material-icons" onclick="$('#mapsContainer').toggle('fast');">map</a></li>
+                <li><a href="#" class="fa fa-flickr" style="font-size: x-large"
+                       onclick="$('#flickrContainer').toggle('fast');"></a></li>
+                <li><a href="#" class="material-icons"
+                       onclick="$('#bayernContainer').toggle('fast');">transfer_within_a_station</a></li>
+            </ul>
+            <form class="navbar-form navbar-right" action="#">
+                <div class="form-group input-group">
+                    <input id="search" type="text" class="form-control" placeholder="Rechercher avec Google">
+                    <span class="input-group-btn">
+            <button class="btn btn-default" onclick="googleSearch()" type="submit">
               <span class="glyphicon glyphicon-search"></span>
             </button>
           </span>
-            </div>
-        </form>
+                </div>
+            </form>
+        </div>
     </div>
 </nav>
 
 <div class="container-fluid">
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="clockContainer">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <h3 class="panel-title">Clock</h3>
-                <span class="glyphicon glyphicon-trash close"></span>
+                <h3 class="panel-title">Horloge
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#clockContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
+
+
             </div>
             <div class="panel-body">
                 <h1 id="hour"></h1>
@@ -236,23 +349,30 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="weatherContainer">
         <div class="panel panel-warning">
             <div class="panel-heading">
-                <h3 class="panel-title">Weather</h3>
+                <h3 class="panel-title">M&eacute;t&eacute;o
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#weatherContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
             </div>
             <div class="panel-body">
-                <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
-                    <img id="icon" src=""/>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <img class="img-responsive" id="icon" src=""/>
                 </div>
-                <div class="input-group col-md-9 has-warning">
-                    <input type="text" class="form-control" placeholder="Ville" id="ville">
-                    <div class="input-group-btn">
-                        <button class="btn btn-warning" type="submit" onclick="updateWeather()">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
+                <form action="#">
+                    <div class="input-group col-md-9 has-warning">
+                        <input type="text" class="form-control" placeholder="Ville" id="ville">
+                        <div class="input-group-btn">
+                            <button class="btn btn-warning" type="submit" onclick="updateWeather()">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
                 <h2 id="town" class="col-xs-6 col-sm-12 col-md-12 col-lg-12"></h2>
                 <h4 class="col-xs-6 col-sm-6 col-md-6 col-lg-6">Temp&eacute;rature <span id="temp"></span></h4>
                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
@@ -262,32 +382,55 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="twitterContainer">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">Tweets de Michel Billaud</h3>
+                <h3 class="panel-title">Tweets de Michel Billaud
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#twitterContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
             </div>
             <div class="panel-body">
-                <a class="twitter-timeline" data-height="250" href="https://twitter.com/MichelBillaud">Tweets by
-                    MichelBillaud</a>
-                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                <!--<div class="input-group">-->
+                <!--<input type="text" class="form-control" placeholder="Mot clé" id="tweet">-->
+                <!--<div class="input-group-btn">-->
+                <!--<button class="btn btn-primary" type="submit" onclick="youtubeSearch()">-->
+                <!--<i class="glyphicon glyphicon-search"></i>-->
+                <!--</button>-->
+                <!--</div>-->
+                <!--</div>-->
+                <!--<br>-->
+                <div class="embed-responsive embed-responsive-4by3">
+                    <a class="twitter-timeline" data-height="250" href="https://twitter.com/MichelBillaud">Tweets by
+                        MichelBillaud</a>
+                    <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="youtubeContainer">
         <div class="panel panel-danger">
             <div class="panel-heading">
-                <h3 class="panel-title">YouTube</h3>
+                <h3 class="panel-title">YouTube
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#youtubeContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
             </div>
             <div class="panel-body">
-                <div class="input-group has-error">
-                    <input type="text" class="form-control" placeholder="Mot clé" id="yt">
-                    <div class="input-group-btn">
-                        <button class="btn btn-danger" type="submit" onclick="youtubeSearch()">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
+                <form action="#">
+                    <div class="input-group has-error">
+                        <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                        <div class="input-group-btn">
+                            <button class="btn btn-danger" type="submit" onclick="youtubeSearch()">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
                 <br>
                 <div class="embed-responsive embed-responsive-4by3">
                     <iframe class="embed-responsive-item" id="ytplayer"
@@ -297,41 +440,86 @@
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="mapsContainer">
         <div class="panel panel-success">
             <div class="panel-heading">
-                <h3 class="panel-title">Google Maps</h3>
+                <h3 class="panel-title">Google Maps
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#mapsContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
             </div>
             <div class="panel-body">
-                <div class="input-group has-success">
-                    <input type="text" class="form-control" placeholder="Lieu" id="mapSearch">
-                    <div class="input-group-btn">
-                        <button class="btn btn-success" type="submit" onclick="Deplace()">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
+                <form action="#">
+                    <div class="input-group has-success">
+                        <input type="text" class="form-control" placeholder="Lieu" id="mapSearch">
+                        <div class="input-group-btn">
+                            <button class="btn btn-success" type="submit" onclick="Deplace()">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
                 <br>
                 <div id="map" class="embed-responsive embed-responsive-4by3">
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="flickrContainer">
         <div class="panel panel-default">
-            <div class="panel-heading">Flickr</div>
+            <div class="panel-heading">
+                <h3 class="panel-title">Flickr
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#flickrContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
+            </div>
             <div class="panel-body">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Mot clé" id="imageSearch">
-                    <div class="input-group-btn">
-                        <button class="btn btn-default" type="submit" onclick="loadImage()">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
+                <form action="#">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Mot clé" id="imageSearch">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="submit" onclick="loadImage()">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
                 <br>
                 <div class="embed-responsive embed-responsive-4by3">
-                    <img id="image" src="">
+                    <img id="image" class="img-responsive" src="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="bayernContainer">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title">R&eacute;sultats du Bayern
+                    <button class="btn btn-danger btn-xs pull-right" onclick="$('#bayernContainer').toggle('fast');">
+                        &times;
+                    </button>
+                </h3>
+            </div>
+            <div class="panel-body">
+                <div class="embed-responsive embed-responsive-4by3">
+                    <table class="table table-fixed">
+                        <thead>
+                        <tr>
+                            <th class="col-xs-4 col-sm-4 col-md-4 col-lg-4">Date</th>
+                            <th class="col-xs-3 col-sm-3 col-md-3 col-lg-3">Dom</th>
+                            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">&nbsp;</th>
+                            <th class="col-xs-1 col-sm-1 col-md-1 col-lg-1">&nbsp;</th>
+                            <th class="col-xs-3 col-sm-3 col-md-3 col-lg-3">Ext</th>
+                        </tr>
+                        </thead>
+                        <tbody id="bayern">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
