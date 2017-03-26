@@ -36,6 +36,10 @@
             float: left;
             border-bottom-width: 0;
         }
+
+        input[type=search]::-webkit-search-cancel-button {
+            -webkit-appearance: searchfield-cancel-button;
+        }
     </style>
 </head>
 <body>
@@ -286,6 +290,20 @@
         navigator.geolocation.getCurrentPosition(initialize);
         loadResults(5);
     });
+
+    var selection;
+    function mouseMove(ev) {
+        var mx = document.getElementById("Souris");
+        mx.value = ev.clientX + " x " + ev.clientY;
+        if (typeof selection !== 'undefined') {
+            var s = selection.id;
+            if (s.indexOf('im') > -1) {
+                selection.style.position = 'absolute';
+                selection.style.left = window.pageXOffset + ev.clientX + 'px';
+                selection.style.top = window.pageYOffset + ev.clientY + 'px';
+            }
+        }
+    }
 </script>
 
 <nav class="navbar navbar-default navbar-static-top" role="navigation">
@@ -332,7 +350,7 @@
 </nav>
 
 <div class="container-fluid">
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="clockContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="clockContainer">
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">Horloge
@@ -350,7 +368,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="weatherContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="weatherContainer">
         <div class="panel panel-warning">
             <div class="panel-heading">
                 <h3 class="panel-title">M&eacute;t&eacute;o
@@ -365,7 +383,7 @@
                 </div>
                 <form action="#">
                     <div class="input-group col-md-9 has-warning">
-                        <input type="text" class="form-control" placeholder="Ville" id="ville">
+                        <input type="search" class="form-control" placeholder="Ville" id="ville">
                         <div class="input-group-btn">
                             <button class="btn btn-warning" type="submit" onclick="updateWeather()">
                                 <i class="glyphicon glyphicon-search"></i>
@@ -383,7 +401,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="twitterContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="twitterContainer">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Tweets de Michel Billaud
@@ -393,15 +411,6 @@
                 </h3>
             </div>
             <div class="panel-body">
-                <!--<div class="input-group">-->
-                <!--<input type="text" class="form-control" placeholder="Mot clé" id="tweet">-->
-                <!--<div class="input-group-btn">-->
-                <!--<button class="btn btn-primary" type="submit" onclick="youtubeSearch()">-->
-                <!--<i class="glyphicon glyphicon-search"></i>-->
-                <!--</button>-->
-                <!--</div>-->
-                <!--</div>-->
-                <!--<br>-->
                 <div class="embed-responsive embed-responsive-4by3">
                     <a class="twitter-timeline" data-height="250" href="https://twitter.com/MichelBillaud">Tweets by
                         MichelBillaud</a>
@@ -411,7 +420,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="youtubeContainer">
+    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" id="youtubeContainer">
         <div class="panel panel-danger">
             <div class="panel-heading">
                 <h3 class="panel-title">YouTube
@@ -423,7 +432,7 @@
             <div class="panel-body">
                 <form action="#">
                     <div class="input-group has-error">
-                        <input type="text" class="form-control" placeholder="Mot clé" id="yt">
+                        <input type="search" class="form-control" placeholder="Mot clé" id="yt">
                         <div class="input-group-btn">
                             <button class="btn btn-danger" type="submit" onclick="youtubeSearch()">
                                 <i class="glyphicon glyphicon-search"></i>
@@ -441,7 +450,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="mapsContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="mapsContainer">
         <div class="panel panel-success">
             <div class="panel-heading">
                 <h3 class="panel-title">Google Maps
@@ -453,7 +462,7 @@
             <div class="panel-body">
                 <form action="#">
                     <div class="input-group has-success">
-                        <input type="text" class="form-control" placeholder="Lieu" id="mapSearch">
+                        <input type="search" class="form-control" placeholder="Lieu" id="mapSearch">
                         <div class="input-group-btn">
                             <button class="btn btn-success" type="submit" onclick="Deplace()">
                                 <i class="glyphicon glyphicon-search"></i>
@@ -468,7 +477,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="flickrContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="flickrContainer">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Flickr
@@ -480,7 +489,7 @@
             <div class="panel-body">
                 <form action="#">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Mot clé" id="imageSearch">
+                        <input type="search" class="form-control" placeholder="Mot clé" id="imageSearch">
                         <div class="input-group-btn">
                             <button class="btn btn-default" type="submit" onclick="loadImage()">
                                 <i class="glyphicon glyphicon-search"></i>
@@ -496,7 +505,7 @@
         </div>
     </div>
 
-    <div class="col-xs-6 col-sm-6 col-md-4 col-lg-3" draggable="true" id="bayernContainer">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" id="bayernContainer">
         <div class="panel panel-warning">
             <div class="panel-heading">
                 <h3 class="panel-title">R&eacute;sultats du Bayern
